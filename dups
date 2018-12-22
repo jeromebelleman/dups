@@ -1,0 +1,46 @@
+#! /usr/bin/env python
+
+'''
+Find duplicates using command
+'''
+
+import sys
+import os
+import argparse
+import subprocess
+
+def main():
+    '''
+    Run
+    '''
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('command')
+    parser.add_argument('files', nargs='+')
+    args = parser.parse_args()
+
+    devnull = open(os.devnull)
+
+    groups = []
+    for file0 in args.files:
+        for file1 in args.files:
+            try:
+                subprocess.check_call([args.command, file0, file1],
+                                      stdout=devnull)
+                for group in groups:
+                    if file0 in group:
+                        group.add(file1)
+                        break
+                else:
+                    groups.append(set([file0, file1]))
+            except subprocess.CalledProcessError:
+                pass
+
+    for group in groups:
+        for path in group:
+            print path
+        print
+
+
+if __name__ == '__main__':
+    sys.exit(main())
